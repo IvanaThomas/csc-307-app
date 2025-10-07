@@ -12,15 +12,45 @@ function MyApp() {
   }
 
   function removeOneCharacter(index) {
-    const updated = characters.filter((character, i) => {
-      return i !== index;
-    });
-    setCharacters(updated);
+    const id = characters[index].id;
+
+    fetch(`http://localhost:8000/users/${id}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (res.ok) {
+          setCharacters(characters.filter((_, i) => i !== index));
+        } else {
+          return res
+        }
+      })
   }
 
+
   function updateList(person) {
-    setCharacters([...characters, person]);
+    postUser(person)
+      .then((response) => {
+        if (response.status === 201) {
+          setCharacters([...characters, person]);
+        } else {
+          console.log("error");
+        }
+      })
+      .catch((error) => console.error("Error posting user:", error));
   }
+
+  function postUser(person) {
+    const promise = fetch("http://localhost:8000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(person),
+    });
+
+    return promise;
+  }
+
   useEffect(() => {
     fetchUsers()
       .then((res) => res.json())
