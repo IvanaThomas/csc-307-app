@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 
 const app = express();
 const port = 8000;
@@ -33,6 +34,7 @@ const users = {
   ]
 };
 
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -45,14 +47,33 @@ const findUserByName = (name) => {
   );
 };
 
+const findUserByNameAndJob = (name, job) => {
+  return users["users_list"].filter(
+    (user) => user["name"] === name && user["job"] === job
+  );
+}
+
+const deleteUserByID = (id) => {
+  const before = users.users_list.length;
+  users["users_list"] = users["users_list"].filter((user) => user["id"] != id);
+  return users.users_list.length < before;
+}
+
 app.get("/users", (req, res) => {
   const name = req.query.name;
-  if (name != undefined) {
-    let result = findUserByName(name);
+  const job = req.query.job;
+
+  if (name !== undefined && job !== undefined) {
+    let result = findUserByNameAndJob(name, job);
     result = { users_list: result };
     res.send(result);
-  } else {
-    res.send(users);
+  } else if (name !== undefined) {
+    let result = findUserByName(name);
+    result = { users_list: result };
+    res.send(result)
+  }
+  else {
+    res.send(users)
   }
 });
 
@@ -66,6 +87,18 @@ app.get("/users/:id", (req, res) => {
     res.status(404).send("Resource not found.");
   } else {
     res.send(result);
+  }
+});
+
+app.delete("/users/:id", (req, res) => {
+  const id = req.params.id;
+
+  const result = deleteUserByID(id);
+
+  if (result) {
+    return res.status(200).send();
+  } else {
+    return res.status(404).send("Resource Not Found");
   }
 });
 
