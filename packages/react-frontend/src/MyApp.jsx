@@ -31,9 +31,14 @@ function MyApp() {
     postUser(person)
       .then((response) => {
         if (response.status === 201) {
-          setCharacters([...characters, person]);
+          return response.json();
         } else {
           console.log("error");
+        }
+      }).then((newUser) => {
+        if (newUser) {
+          setCharacters([...characters, person]);
+          console.log("new user: ", newUser)
         }
       })
       .catch((error) => console.error("Error posting user:", error));

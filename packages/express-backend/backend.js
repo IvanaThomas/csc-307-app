@@ -96,7 +96,7 @@ app.delete("/users/:id", (req, res) => {
   const result = deleteUserByID(id);
 
   if (result) {
-    return res.status(200).send();
+    return res.status(204).send();
   } else {
     return res.status(404).send("Resource Not Found");
   }
@@ -109,8 +109,10 @@ const addUser = (user) => {
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
+  userToAdd.id = Math.random().toString().substr(2, 7);
   addUser(userToAdd);
-  res.send(201);
+  res.status(201).send(userToAdd);
+
 });
 
 app.listen(port, () => {
